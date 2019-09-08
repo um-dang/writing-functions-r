@@ -6,11 +6,11 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = T, error = F)
+knitr::opts_chunk$set(echo = T, error = T)
 ```
 
 ```{r, echo=F}
-library(rmarkdown)
+suppressPackageStartupMessages(library(rmarkdown))
 ```
 
 ## Summary
@@ -138,7 +138,7 @@ Feel free to try out other inputs as well!
 
 The input arguments in the power function are `base` and `exponent`. These *variables* are defined only within the context of the function, not in the global environment. So we can print out `base` and `exponent` within the function, but if we try to print out either of these variables outside of the function, we will get an error (unless it's defined in your global environment). Let's try it out. What do you think happens if we try to print out `base` outside of the function?
 
-```{r}
+```{r, error = T}
 # print base outside of function
 print(base)
 ```
@@ -239,7 +239,7 @@ pow(2, 3, print_base = FALSE)
 
 _Note:_ You have to include arguments that don't have default values. If not, then you get an error because there is nothing stored in that variable in the function, so the code inside can't be executed:
 
-```{r}
+```{r, error=T}
 # what happens if you run this line?
 pow(2)
 ```
