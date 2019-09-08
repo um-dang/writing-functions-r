@@ -1,0 +1,381 @@
+---
+title: "Writing FUNctions in R"
+author: "Zena Lapp"
+date: "August 26, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, error = F)
+```
+
+```{r, echo=F}
+library(rmarkdown)
+```
+
+## Summary
+
+- Functions are used to make your code more _modular_ - easier to read and reuse.
+- Functions take an input (_arguments_) and _return_ an output.
+- Arguments are variables that only exist inside the function.
+- You can have _default_ arguments for your function.
+- Document your function well so other people know how to use it!
+
+## Motivation
+
+Have you ever copied and pasted code because you want to reuse it but with different data or in a slightly different way? If so, you might want to make that code into a function! Using functions also makes your code much easier to read.
+
+You've already used lots of built-in functions in R. Examples are `print()`, `read.csv()`, and `sum()`, to name a few.
+
+## Anatomy of a Function
+
+Functions have an **input** and an **output**. We provide the input, and then the function does things to generate the output. Another way to put this is functions *take* arguments (i.e. input) and *return* an output.
+
+```{r, eval=F}
+# Anatomy of a function
+my_function = function(input){
+  # do things to input
+  return(output)
+}
+```
+
+Let's take a look at a few different analogies to get a better idea of what functions are.
+
+## Function Analogies
+
+
+|"Function" name| Input: what "function" takes  | Under the hood: what "function" does  | Output: what "function" returns |
+|---|---|---|---|
+|_Vending machine_|Money & snack choice|Some computational/mechanical process|Snack|
+|_Google maps_|Start & end location|Finds fastest route|Directions for fastest route|
+
+## Real Examples
+
+### Boring example so we can get our feet wet
+
+#### Writing and using a simple function
+
+Let's start out writing a simple function, just to learn the basics of how to write functions.
+
+Let's write a function called `pow` that calculates the power of two numbers (a base and an exponent). It takes two numbers - a base and an exponent - and returns the base raised to the exponent. It's important to document what your function does so other people can use it.
+
+```{r}
+# write function to find power of two numbers
+pow = function(base, exponent){
+  # find power of base raised to exponent
+  # example: pow(3,2)
+  power = base ^ exponent
+  return(power)
+}
+```
+
+Now let's test our function out! You can use any two numbers as the input to the function.
+
+If you include the argument names, then you can include the numbers in any order you want:
+
+```{r}
+# using numbers as input
+# explicitly name arguments (order doesn't matter)
+pow(exponent = 2, base = 3)
+pow(base = 3, exponent = 2)
+```
+
+Here, you should get the same answer for both.
+
+If you decide to just include the numbers and not the names, then you have to make sure the numbers are in the correct order (i.e. the order in which the arguments are defined in the function - base first and exponent second):
+
+```{r}
+# using numbers as input
+# using the order of the arguments (order matters)
+pow(3,2)
+pow(2,3)
+```
+
+Here, you should get a different answer for each.
+
+You can also use variables as input:
+
+```{r}
+# using variables as input
+b = 3
+e = 2
+pow(b,e)
+```
+
+Just like built-in functions, you can also save the output of the function to a variable:
+
+```{r}
+# saving it to a variable
+p = pow(b,e)
+print(p)
+```
+
+We can also write this function in a shorter way if you want. In R, the last line of the function is what is returned; you don't have to specify `return()` for it to be returned.
+
+```{r}
+#  function to find power of two numbers
+pow = function(base, exponent){
+  # find power of base raised to exponent
+  # example: pow(3,2)
+  base ^ exponent
+}
+
+# test it out
+pow(3,2)
+```
+
+For more complicated functions, we have to balance code length and readability. You don't want it so short that people aren't able to understand it!
+
+Let's try other inputs, because that's the real power of using functions (no pun intended).
+
+```{r}
+pow(10,3)
+```
+
+Feel free to try out other inputs as well!
+
+#### Scope of argument variables
+
+The input arguments in the power function are `base` and `exponent`. These *variables* are defined only within the context of the function, not in the global environment. So we can print out `base` and `exponent` within the function, but if we try to print out either of these variables outside of the function, we will get an error (unless it's defined in your global environment). Let's try it out. What do you think happens if we try to print out `base` outside of the function?
+
+```{r}
+# print base outside of function
+print(base)
+```
+
+It doesn't exist! This is called the _scope_ of the variables - they can only be seen in the function, but not in the global environment.
+
+#### Printing and returning variables in functions
+
+Now let's get some practice with printing variables inside functions, where they are actually defined. Print `base` inside function:
+
+```{r}
+#  function to find power of two numbers
+pow = function(base, exponent){
+  # find power of base raised to exponent
+  # example: pow(3,2)
+  print(base)
+  base ^ exponent
+}
+
+# test it out
+p = pow(3,2)
+# print output of function
+print(p)
+```
+
+What happens if we write it this way instead? Why?
+
+```{r}
+#  function to find power of two numbers
+pow = function(base, exponent){
+  # find power of base raised to exponent
+  # example: pow(3,2)
+  base ^ exponent
+  print(base)
+}
+
+# test it out
+p = pow(3,2)
+# print output of function
+print(p)
+```
+
+The output of the last line of the function is what is returned, so in this case `base` is returned. If you don't use the return statement, make sure the last line is actually what you want to return!
+
+How about this way? Again, why?
+
+```{r}
+#  function to find power of two numbers
+pow = function(base, exponent){
+  # find power of base raised to exponent
+  # example: pow(3,2)
+  return(base ^ exponent)
+  print(base)
+}
+
+# test it out
+p = pow(3,2)
+# print output of function
+print(p)
+```
+
+Code after a return statement won't be executed, so here `base` is not printed out because the function stops at the `return` line.
+
+#### Optional arguments with default values
+
+If you want something to normally happen, but have the option for it to not happen, you can use _optional arguments_. For instance, if you want to have the default be to print out the `base` variable, but give the user the option to not print it out if they want. You can code this using another argument, say, the `print_base` argument. In this case, if the user doesn't specify a value, the function uses the _default_ option, which is defined where you define the argument in the function:
+
+```{r}
+pow = function(base, exponent, print_base=TRUE){
+  if(print_base){
+    print(base)
+  }
+base ^ exponent
+}
+# default
+pow(2, 3)
+# print_base = F
+pow(2, 3, print_base = FALSE)
+```
+
+If you want more practice with default arguments, try adding an optional `print_exponent` argument with a default value of `TRUE`.
+
+```{r}
+pow = function(base, exponent, print_base=TRUE, print_exponent=TRUE){
+  if(print_base){
+    print(base)
+  }
+  if(print_exponent){
+    print(exponent)
+  }
+base ^ exponent
+}
+# default
+pow(2, 3)
+# print_base = F
+pow(2, 3, print_base = FALSE)
+```
+
+_Note:_ You have to include arguments that don't have default values. If not, then you get an error because there is nothing stored in that variable in the function, so the code inside can't be executed:
+
+```{r}
+# what happens if you run this line?
+pow(2)
+```
+
+What argument are we missing here?
+
+#### Argument variable names
+
+Another important note is that it doesn't matter what we call the input arguments. Right now, the input arguments are `base` and `exponent`. Let's try changing them to something totally random, maybe `pizza` and `pie`. Pizza and pie probably doesn't have anything to do with the input (two numbers), but the computer doesn't know that!
+
+```{r}
+# use pizza as variable name
+#  function to find power of two numbers
+pow = function(pizza, pie){
+  # find power of base raised to exponent
+  # example: pow(3,2)
+  pizza ^ pie
+}
+
+# test it out
+pow(3,2)
+```
+
+Although you can name your input arguments anything since the computer doesn't care, you actually want to name them something useful so that people reading the code (including your future self!) can more easily understand what's going on. Thinking of good variable names can be hard, but it's important!
+
+#### Returning multiple variables from a function
+
+If you want to return multiple variables from your function, such as the base, the exponent, and the result, you can return them as a list.
+
+```{r}
+pow = function(base, exponent, print_base=TRUE){
+  if (print_base){
+    print(base)
+  }
+  return(list(base=base,
+              exp=exponent,
+              p=base ^ exponent))
+}
+
+# test it out
+result = pow(3,2)
+print(result)
+```
+
+#### Loading in functions from another file
+
+Say you make a function that you want to be able to reuse for different analyses in different scripts. You can save it in its own R script and then load it into other scripts using the `source` function. Here's an example of how you would use it if the name of the script containing your function is `power.R`:
+
+```{r, eval=F}
+# load power function
+source('/path/to/power.R')
+# use power function
+pow(3,2)
+```
+
+### Try writing your own function before we move on
+
+Now that we've gone over how to write a function, it's time to try it out yourself! Write a function called `average` that takes a vector of numbers and returns the mean of those numbers. If you want to get fancy, try writing it in a different script and then using the `source` function to load it in and use it. You can test your function using an input you know the answer to as well as the built-in `mean` function in R.
+
+```{r}
+# function to calculate mean
+average = function(numbers){
+  # find mean of vector of numbers
+  sum(numbers)/length(numbers)
+}
+
+# test it out
+average(0:100)
+mean(0:100)
+```
+
+### More interesting example
+
+Okay, now we're ready to move on to a more interesting example. One thing I often find myself wanting to do is plot multiple histograms. For instance, the ages of people in two different groups. Let's write a function to do this!
+
+First, let's download some data we'll use.
+
+```{r}
+# create data directory if there isn't one
+dir.create('data',showWarnings = F)
+# download data if you don't already have it
+if(!file.exists("data/gapminder_data.csv")){
+  download.file("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/gh-pages/_episodes_rmd/data/gapminder_data.csv", destfile = 'data/gapminder_data.csv')
+}
+# read in gapminder data
+gapminder = read.csv('data/gapminder_data.csv')
+# look at gapminder data
+head(gapminder)
+```
+
+Say we want to look at the distribution of life expectancy for countries grouped by continent. We could just write some code to do this, but what if we also want to look at the distribution of gdp per capita grouped by continent, or what if we want to look at the distribution of values grouped by something else for a totally different data set? This is why a function could be useful here. Let's call our function `multihist`, meaning we want to plot multiple histograms on one plot.
+
+_Side note:_ When you want to use variables instead of column names for `ggplot`, like we'll want to do for the function, you have to use `aes_string` instead of `aes`.
+
+```{r}
+# load library
+library(ggplot2)
+
+# function to plot multiple histograms from list of vectors
+# input:
+#   df: dataframe with information to plot in the columns
+#   x: column name with x values
+#   y: column name with values to separate by
+# output: histogram
+multihist = function(df,x,y){
+  ggplot(df, aes_string(x, fill = y)) +
+    geom_histogram(alpha = 0.5, position = 'identity') + theme_classic() # counts
+}
+```
+
+Now let's test out our function:
+
+
+```{r}
+# test out function
+multihist(gapminder,'pop','continent')
+```
+
+We can also loop over many variables and use our function to make a plot for each:
+
+```{r}
+# loop over multiple variables
+for(var in c('pop','lifeExp','gdpPercap')){
+  # in a for loop, you have to print the plot out to see it
+  print(multihist(gapminder,var,'continent'))
+}
+```
+
+Nice job! If you want more practice, try making a histogram of life expectancy stratified by year. You can also use this same function on another dataframe. Feel free to test it out on one of your own!
+
+```{r}
+gapminder$year = as.character(gapminder$year)
+multihist(gapminder,'lifeExp','year')
+```
+
+```{r, echo=FALSE}
+dir.create('docs', showWarnings=F)
+rmarkdown::render('writing-functions-r.Rmd', output_dir = 'docs/')
+```
